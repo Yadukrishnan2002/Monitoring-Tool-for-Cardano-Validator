@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.yadukrishnan.u.block_monitoring_tool</string>
+    <string>com.block_monitoring_tool</string>
     <key>ProgramArguments</key>
     <array>
         <string>/path/to/python/interpreter</string>
