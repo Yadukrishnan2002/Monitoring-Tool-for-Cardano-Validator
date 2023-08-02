@@ -5,12 +5,16 @@ import schedule
 import logging
 
 
-
+# Set up the url and API key for the Blockfrost api
 BASE_URL = 'https://cardano-mainnet.blockfrost.io/api/v0'
 API_KEY = 'mainnetyNY3Fu4wG0pHFvMaqjTbNl0WDrPjWOJw' 
-Bot_TOKEN = "6627033145:AAEApKdmRMBiq9eIPV4ZrXmglhzPeIKoF1I"
-User_chat_id = "763577920"
 
+# Provide the bot token id of telegram bot
+Bot_TOKEN = "6627033145:AAEApKdmRMBiq9eIPV4ZrXmglhzPeIKoF1I"
+
+
+# Using the get_updates_url, fetch the ChatID of all the individuals who have registered with the newly created bot
+# This is done to send the alert signals to all the participants who have registered with the bot
 get_updates_url = f"https://api.telegram.org/bot{Bot_TOKEN}/getUpdates"
 response = requests.get(get_updates_url).json()
 
@@ -21,23 +25,33 @@ for res in resList:
     chatID.append(res['message']['chat']['id'])
 
 
+# Setting up the logging configuration:
+# filename: Name of the log file to store the logs
+# level: Logging levels to be captured
+# format: sets the format of the log message
 logging.basicConfig(
     filename='block_monitoring_tool.log',
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
+# Function that logs a message to the log file
 def log_print(msg):
     logging.info(msg)
 
 
 
-
+# Function which reads the content from the given Leadership Schedule text file and parse the date into a list of tuples
+# Each tuple contains the slot number and the corresponding UTC time 
 def read_scheduled_blocks(file_path):
     scheduled_blocks = []
     with open(file_path, 'r') as file:
         for line in file:
+
+            # Splits the line using the delimiter to extract values
             values = line.strip().split('                   ')
+
+            # Check if the line contains exactly two values (slot number and UTC time)
             if len(values) == 2:
                 slotno, utc_time_str = values
                 try:
@@ -50,6 +64,8 @@ def read_scheduled_blocks(file_path):
     return scheduled_blocks
 
 
+# Function which fetches the blocks produced by a specific pool ID from the Cardano blockchain usng the Blockfrost API
+# The response will be a json file that consists of the block hashes
 def fetch_blocks_by_pool_id(pool_id):
     url = f'{BASE_URL}/pools/{pool_id}/blocks'
     headers = {'project_id': API_KEY}
@@ -59,12 +75,15 @@ def fetch_blocks_by_pool_id(pool_id):
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         blocks_hashes = response.json()
+
+        # Returns the list of block hashes fetched from the API
         return blocks_hashes
     except requests.exceptions.RequestException as e:
         print('Error fetching blocks:', e)
         return None
 
 
+# Function which fetches the detailed information about a specific block using its unique block hash
 def fetch_block_by_hash(block_hash):
     url = f'{BASE_URL}/blocks/{block_hash}'
     headers = {'project_id': API_KEY}
@@ -73,16 +92,23 @@ def fetch_block_by_hash(block_hash):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         block_info = response.json()
+
+        # Returns a dictionary containing block information
         return block_info
     except requests.exceptions.RequestException as e:
         print(f'Error fetching block {block_hash}:', e)
         return None
 
 
-
+# This Function makes use of the above two functions to get the list of blocks with its information
+# It then returns all the blocks that fall between the specified time range of an epoch, ie 5 days
 def fetch_blocks_within_epoch(pool_id):
     blocks_hashes = fetch_blocks_by_pool_id(pool_id)
+
+    #Calculates the time stamp of the current time
     current_time = int(time.time())
+
+    # Calculates the time stamp for five days ago from the current time
     five_days_ago = current_time - 5 * 24 * 60 * 60
 
     blocks_within_time_range = []
@@ -90,14 +116,19 @@ def fetch_blocks_within_epoch(pool_id):
         block_info = fetch_block_by_hash(block_hash)
         if block_info is not None:
             block_timestamp = block_info['time']
+
+            #Checks if the block falls within the time range of the current epoch
             if block_timestamp >= five_days_ago and block_timestamp <= current_time:
                 slotno = block_info['slot']
+
+                #Converts timestamp to UTC Time format
                 utc_time = datetime.datetime.fromtimestamp(block_info['time'])
                 blocks_within_time_range.append((slotno,utc_time))
 
     return blocks_within_time_range
 
 
+# Function which fetches the latest block produced by a specified pool ID
 def fetch_latest_block(pool_id):
 
     fetched_blocks = []
@@ -107,8 +138,10 @@ def fetch_latest_block(pool_id):
         block_info = fetch_block_by_hash(i)
         fetched_blocks.append(block_info)
 
+    # Sort the fetched_blocks list based on the 'time' key in descending order of time, with the latest block first
     sorted_blocks = sorted(fetched_blocks, key=lambda x: x['time'], reverse=True)
 
+    # Returns the first element of the sorted_blocks list, which is the latest block produced
     return sorted_blocks[0]
 
     
