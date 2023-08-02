@@ -2,6 +2,7 @@ import requests
 import datetime
 import time
 import schedule
+import logging
 
 
 
@@ -18,6 +19,18 @@ chatID = []
 
 for res in resList:
     chatID.append(res['message']['chat']['id'])
+
+
+logging.basicConfig(
+    filename='block_monitoring_tool.log',
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+def log_print(msg):
+    logging.info(msg)
+
+
 
 
 def read_scheduled_blocks(file_path):
@@ -102,7 +115,7 @@ def fetch_latest_block(pool_id):
 
 def check_Block_produced_in_6hrs(pool_id):
 
-    print("\nChecking If any Blocks have been produced in 6 hours")
+    log_print("\nChecking If any Blocks have been produced in 6 hours")
 
     latest_block = fetch_latest_block(pool_id)
 
@@ -118,7 +131,7 @@ def check_Block_produced_in_6hrs(pool_id):
             url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
             requests.get(url).json()
 
-        print(message)
+        log_print(message)
 
     else:
 
@@ -127,12 +140,12 @@ def check_Block_produced_in_6hrs(pool_id):
             url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
             requests.get(url).json()
 
-        print(message)
+        log_print(message)
 
 
 def compare_scheduled_and_fetched_blocks(pool_id):
 
-    print("\nChecking if all the Scheduled Blocks have been produced or not")
+    log_print("\nChecking if all the Scheduled Blocks have been produced or not")
 
     scheduled_blocks = read_scheduled_blocks('LeadershipSchedule.txt')
     blocks_within_epoch = fetch_blocks_within_epoch(pool_id)
@@ -155,7 +168,7 @@ def compare_scheduled_and_fetched_blocks(pool_id):
             url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
             requests.get(url).json()
 
-        print(Missing_Blocks)
+        log_print(Missing_Blocks)
     
     else:
         for User_chatid in chatID:
