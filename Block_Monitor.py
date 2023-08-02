@@ -145,20 +145,25 @@ def fetch_latest_block(pool_id):
     return sorted_blocks[0]
 
     
-
+# Function to check if any blocks have been produced in the last 6 hours for a specific pool ID
+# Sends alerts using Telegram API if no block are produced within the time limit
 def check_Block_produced_in_6hrs(pool_id):
 
     log_print("\nChecking If any Blocks have been produced in 6 hours")
 
+    # Fetches the latest block produced by the specified pool
     latest_block = fetch_latest_block(pool_id)
 
     current_time = int(time.time())
     time_difference = current_time - latest_block['time']
 
+    # Define the time limit, which is 6 hours
     time_limit = 6 * 60 * 60
 
+    # Check if the time difference exceeds the time limit, indicating that no blocks have been produced in the last 6 hours.
     if(time_difference > time_limit):
 
+        # If no blocks have been produced, send an alert to all specified chat IDs using Telegram API.
         for User_chatid in chatID:
             message = "!!!ALERT!!! \nNo Blocks produced in the last 6 hours"
             url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
@@ -168,6 +173,7 @@ def check_Block_produced_in_6hrs(pool_id):
 
     else:
 
+        # If blocks have been produced within the last 6 hours, send a confirmation message to all specified chat IDs using Telegram API.
         for User_chatid in chatID:
             message = "Blocks have been produced in the last 6 hours"
             url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
@@ -176,26 +182,33 @@ def check_Block_produced_in_6hrs(pool_id):
         log_print(message)
 
 
+# Function to Compare scheduled blocks with the blocks produced within the current epoch for a specific Pool ID
+# Sends alerts using the Telegram API if any scheduled blocks are missing
 def compare_scheduled_and_fetched_blocks(pool_id):
 
     log_print("\nChecking if all the Scheduled Blocks have been produced or not")
 
+    # Read the scheduled blocks from the given text file
     scheduled_blocks = read_scheduled_blocks('LeadershipSchedule.txt')
+
+    # Fetch the blocks produced within the current epoch 
     blocks_within_epoch = fetch_blocks_within_epoch(pool_id)
 
     Missing_Blocks = []
-    # for fetchedBlock in blocks_within_epoch:
-    #     if fetchedBlock not in scheduled_blocks:
-    #         Missing_Blocks.append(fetchedBlock[0])
 
+    # Compares each scheduled blocks with the blocks produced within the epoch
     for scheduledblock in scheduled_blocks:
         if scheduledblock not in blocks_within_epoch:
+
+            #If the scheduled block is not present in the blocks produced within the current epoch, append the slot no of the 
+            # missing scheduled block to the Missing_Blocks list
             Missing_Blocks.append(scheduledblock[0])
 
 
-    print(len(Missing_Blocks)) 
-
+    # Checks if any scheduled blocks are missing or not
     if(len(Missing_Blocks) > 0):
+
+        # If there are missing scheduled blocks, send an alert to all specified chat IDs(Individuals) using Telegram API
         for User_chatid in chatID:
             message = f"!!!ALERT!!! \n\nScheduled blocks with the below SlotNos are missing in the current Epoch\n\n{Missing_Blocks}"
             url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
@@ -204,6 +217,9 @@ def compare_scheduled_and_fetched_blocks(pool_id):
         log_print(Missing_Blocks)
     
     else:
+
+        # If all scheduled blocks have been successfully produced within the current epoch, send a confirmation message to all 
+        # specified chat IDs (Individuals) using Telegram API
         for User_chatid in chatID:
             message = "All the Scheduled blocks have been successfully produced in the current Epoch"
             url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
