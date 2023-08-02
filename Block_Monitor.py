@@ -7,10 +7,10 @@ import logging
 
 # Set up the url and API key for the Blockfrost api
 BASE_URL = 'https://cardano-mainnet.blockfrost.io/api/v0'
-API_KEY = 'mainnetyNY3Fu4wG0pHFvMaqjTbNl0WDrPjWOJw' 
+API_KEY = 'Your_Blockfrost_API_Key' 
 
 # Provide the bot token id of telegram bot
-Bot_TOKEN = "6627033145:AAEApKdmRMBiq9eIPV4ZrXmglhzPeIKoF1I"
+Bot_TOKEN = "Your_Telegram_Bot_Token"
 
 
 # Using the get_updates_url, fetch the ChatID of all the individuals who have registered with the newly created bot
