@@ -6,8 +6,8 @@
     <string>com.yadukrishnan.u.block_monitoring_tool</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/yadukrishnan.u/miniforge3/bin/python3</string>
-        <string>/Users/yadukrishnan.u/Documents/Academics/Collage/Placement/Luganodes_Assignment/Monitoring-Tool-for-Cardano-Validator/main.py</string>
+        <string>/path/to/python/interpreter</string>
+        <string>/path/to/python/script/file/main.py</string>
     </array>
     <key>KeepAlive</key>
     <true/>
