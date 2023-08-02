@@ -102,7 +102,7 @@ def fetch_latest_block(pool_id):
 
 def check_Block_produced_in_6hrs(pool_id):
 
-    print("Checking If any Blocks have been produced in 6 hours")
+    print("\nChecking If any Blocks have been produced in 6 hours")
 
     latest_block = fetch_latest_block(pool_id)
 
@@ -132,21 +132,26 @@ def check_Block_produced_in_6hrs(pool_id):
 
 def compare_scheduled_and_fetched_blocks(pool_id):
 
-    print("Checking if all the Scheduled Blocks have been produced or not")
+    print("\nChecking if all the Scheduled Blocks have been produced or not")
 
     scheduled_blocks = read_scheduled_blocks('LeadershipSchedule.txt')
     blocks_within_epoch = fetch_blocks_within_epoch(pool_id)
 
     Missing_Blocks = []
-    for fetchedBlock in blocks_within_epoch:
-        if fetchedBlock not in scheduled_blocks:
-            Missing_Blocks.append(fetchedBlock[0])
+    # for fetchedBlock in blocks_within_epoch:
+    #     if fetchedBlock not in scheduled_blocks:
+    #         Missing_Blocks.append(fetchedBlock[0])
+
+    for scheduledblock in scheduled_blocks:
+        if scheduledblock not in blocks_within_epoch:
+            Missing_Blocks.append(scheduledblock[0])
+
 
     print(len(Missing_Blocks)) 
 
     if(len(Missing_Blocks) > 0):
         for User_chatid in chatID:
-            message = "!!!ALERT!!! \nSome Scheduled blocks are missed in the current Epoch"
+            message = f"!!!ALERT!!! \n\nScheduled blocks with the below SlotNos are missing in the current Epoch\n\n{Missing_Blocks}"
             url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
             requests.get(url).json()
 
