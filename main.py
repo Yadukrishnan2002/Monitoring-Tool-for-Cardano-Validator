@@ -1,6 +1,6 @@
 import schedule
 import time
-from test7 import *
+from Block_Monitor import *
 
 POOL_ID = 'pool1qvudfuw9ar47up5fugs53s2g84q3c4v86z4es6uwsfzzs89rwha'
 

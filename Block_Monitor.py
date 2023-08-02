@@ -7,6 +7,18 @@ import schedule
 
 BASE_URL = 'https://cardano-mainnet.blockfrost.io/api/v0'
 API_KEY = 'mainnetyNY3Fu4wG0pHFvMaqjTbNl0WDrPjWOJw' 
+Bot_TOKEN = "6627033145:AAEApKdmRMBiq9eIPV4ZrXmglhzPeIKoF1I"
+User_chat_id = "763577920"
+
+get_updates_url = f"https://api.telegram.org/bot{Bot_TOKEN}/getUpdates"
+response = requests.get(get_updates_url).json()
+
+resList = response['result']
+chatID = []
+
+for res in resList:
+    chatID.append(res['message']['chat']['id'])
+
 
 def read_scheduled_blocks(file_path):
     scheduled_blocks = []
@@ -100,9 +112,22 @@ def check_Block_produced_in_6hrs(pool_id):
     time_limit = 6 * 60 * 60
 
     if(time_difference > time_limit):
-        print("\nNo blocks have been produced in the last 6 hours")
+
+        for User_chatid in chatID:
+            message = "!!!ALERT!!! \nNo Blocks produced in the last 6 hours"
+            url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
+            requests.get(url).json()
+
+        print(message)
+
     else:
-        print("\nBlocks have been produced in the last 6 hours")
+
+        for User_chatid in chatID:
+            message = "Blocks have been produced in the last 6 hours"
+            url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
+            requests.get(url).json()
+
+        print(message)
 
 
 def compare_scheduled_and_fetched_blocks(pool_id):
@@ -119,6 +144,20 @@ def compare_scheduled_and_fetched_blocks(pool_id):
 
     print(len(Missing_Blocks)) 
 
+    if(len(Missing_Blocks) > 0):
+        for User_chatid in chatID:
+            message = "!!!ALERT!!! \nSome Scheduled blocks are missed in the current Epoch"
+            url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
+            requests.get(url).json()
+
+        print(Missing_Blocks)
+    
+    else:
+        for User_chatid in chatID:
+            message = "All the Scheduled blocks have been successfully produced in the current Epoch"
+            url = f"https://api.telegram.org/bot{Bot_TOKEN}/sendMessage?chat_id={User_chatid}&text={message}"
+
+        requests.get(url).json()
     
  
 
