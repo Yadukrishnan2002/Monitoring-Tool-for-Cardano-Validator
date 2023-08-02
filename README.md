@@ -56,6 +56,8 @@ Install dependencies
 
 ### Run the monitoring tool directly
 
+Make sure to replace all the placeholders with their respective values before running the component
+
 Run the tool
 
 ```bash
